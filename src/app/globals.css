@@ -1,2 +1,9 @@
 @import "tailwindcss";
 
+input{
+    background-color: white;
+}
+
+.link{
+    @apply hover:text-gray-800 hover:scale-110 transition-all;
+}
