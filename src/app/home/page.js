@@ -1,6 +1,7 @@
 "use client"
-import React, { useActionState, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ToastContainer, toast } from 'react-toastify';
+import ClipLoader from "react-spinners/ClipLoader";
 import 'react-toastify/dist/ReactToastify.css';
 
 const Generate = () => {
@@ -9,6 +10,7 @@ const Generate = () => {
     const [handle, sethandle] = useState()
     const [pic, setpic] = useState("")
     const [desc, setdesc] = useState("")
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -23,11 +25,11 @@ const Generate = () => {
             if (res.status == 201) {
                 console.log("Data fetched successfully")
                 console.log(result);
-                
+
                 sethandle(result.data.handle.toUpperCase())
                 setpic(result.data.pic)
                 setdesc(result.data.desc)
-                if(result.data.links.length == 0) {
+                if (result.data.links.length == 0) {
                     setLinks([{ link: "", linktext: "" }])
                 }
                 else
@@ -35,6 +37,7 @@ const Generate = () => {
             } else {
                 toast.error(result.error)
             }
+            setLoading(false);
         }
         fetchData();
     }, [])
@@ -64,7 +67,7 @@ const Generate = () => {
             links: links
         }
         console.log(JSON.stringify(data));
-        
+
         const res = await fetch('/api/generate', {
             method: 'PUT',
             credentials: 'include',
@@ -89,35 +92,48 @@ const Generate = () => {
             <div className="col1 flex justify-center items-center flex-col text-gray-900">
                 <div className='flex flex-col gap-3 my-8'>
                     <form action={submitLinks}>
-                    <h1 className='font-bold text-4xl'>Create your Bittree</h1>
-                    <div className="item">
+                        <h1 className='font-bold text-4xl'>Create your Bittree</h1>
+                        <div className="item">
 
-                        <h2 className='font-semibold text-2xl'>Step 1: Claim your Handle</h2>
-                        <div className='mx-4'>
-                            <input value={handle || ""} className=' font-extrabold px-2 py-1 my-2 focus:outline-pink-500 rounded-full disabled:bg-slate-200' disabled={true}
-                                type="text"/>
-                        </div>
-                    </div>
-                    <div className="item">
-                        <h2 className='font-semibold text-2xl'>Step 2: Add Links</h2>
-                        {links && links.map((item, index) => {
-                            return <div key={index} className='mx-4'>
-                                <input value={item.linktext || ""} onChange={e => { handleChange(index, item.link, e.target.value) }} className='px-2 py-1 mx-2 my-2 focus:outline-pink-500 rounded-full' type="text" placeholder='Enter link text' />
-                                <input value={item.link || ""} onChange={e => { handleChange(index, e.target.value, item.linktext) }} className='px-2 py-1 mx-2 my-2 focus:outline-pink-500 rounded-full'
-                                    type="text" placeholder='Enter link' />
+                            <h2 className='font-semibold text-2xl'>Step 1: Claim your Handle</h2>
+                            <div className='mx-4'>
+                                <input value={handle || ""} className=' font-extrabold px-2 py-1 my-2 focus:outline-pink-500 rounded-full disabled:bg-slate-200' disabled={true}
+                                    type="text" />
                             </div>
-                        })}
-                        <button type='button' onClick={addLink} className='px-2 py-2 mx-6 bg-slate-900 text-white font-bold rounded-3xl cursor-pointer'>+ Add Link</button>
-                    </div>
-
-                    <div className="item">
-                        <h2 className='font-semibold text-2xl'>Step 3: Add Picture and Description</h2>
-                        <div className='mx-4 flex flex-col'>
-                            <input value={pic} onChange={e => { setpic(e.target.value) }} className='px-2 py-1 mx-2 my-2 focus:outline-pink-500 rounded-full' type="text" placeholder='Enter link to your Picture' />
-                            <input value={desc} onChange={e => { setdesc(e.target.value) }} className='px-2 py-1 mx-2 my-2 focus:outline-pink-500 rounded-full' type="text" placeholder='Enter description' />
-                            <button disabled={links[0].linktext == "" || links[0].link == ""} type='submit' className='disabled:bg-slate-500 p-3 py-2 mx-2 w-fit my-5 bg-slate-900 text-white font-bold rounded-3xl cursor-pointer'>Create your BitTree</button>
                         </div>
-                    </div>
+                        <div className="item">
+                            <h2 className='font-semibold text-2xl'>Step 2: Add Links</h2>
+                            {links && links.map((item, index) => {
+                                return <div key={index} className='mx-4'>
+                                    <input value={item.linktext || ""} onChange={e => { handleChange(index, item.link, e.target.value) }} className='px-2 py-1 mx-2 my-2 focus:outline-pink-500 rounded-full' type="text" placeholder='Enter link text' />
+                                    <input value={item.link || ""} onChange={e => { handleChange(index, e.target.value, item.linktext) }} className='px-2 py-1 mx-2 my-2 focus:outline-pink-500 rounded-full'
+                                        type="text" placeholder='Enter link' />
+                                </div>
+                            })}
+                            <button type='button' onClick={addLink} className='px-2 py-2 mx-6 bg-slate-900 text-white font-bold rounded-3xl cursor-pointer'>+ Add Link</button>
+                        </div>
+
+                        <div className="item">
+                            <h2 className='font-semibold text-2xl'>Step 3: Add Picture and Description</h2>
+                            <div className='mx-4 flex flex-col'>
+                                <input value={pic} onChange={e => { setpic(e.target.value) }} className='px-2 py-1 mx-2 my-2 focus:outline-pink-500 rounded-full' type="text" placeholder='Enter link to your Picture' />
+                                <input value={desc} onChange={e => { setdesc(e.target.value) }} className='px-2 py-1 mx-2 my-2 focus:outline-pink-500 rounded-full' type="text" placeholder='Enter description' />
+                                {loading && (
+                                    <div className="flex items-center justify-center py-4">
+                                        <ClipLoader color="#5856d6" size={18} speedMultiplier={1.2} />
+                                        <span className="ml-3 text-sm text-gray-500 font-medium">Loading, please wait...</span>
+                                    </div>
+                                )}
+                                <button disabled={links[0].linktext == "" || links[0].link == ""} type='submit' className='disabled:bg-slate-500 p-3 py-2 mx-2 w-fit my-5 bg-slate-900 text-white font-bold rounded-3xl cursor-pointer'>Create your BitTree</button>
+                            </div>
+                        </div>
+                        <div className='item'>
+                            <h2 className='font-semibold text-2xl'>Step 4: Share your BitTree</h2>
+                            <div className='mx-4 flex flex-col'>
+                                <p className='text-lg'>Share your BitTree with others using the link below:</p>
+                                <a href={`/user/${handle}`} target="_blank" rel="noopener noreferrer" className='text-blue-500 underline'>{`https://bittree.vercel.app/${handle}`}</a>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>

@@ -13,6 +13,13 @@ export async function POST(req) {
             return new Response(JSON.stringify({ error: 'Handle and password are required' }), { status: 400 });
         }
 
+        // Normalize handle to lowercase
+        handle = handle.toLowerCase();
+
+        const existingUser = await User.findOne({ handle });
+        if (existingUser) {
+            return new Response(JSON.stringify({ error: 'User already exists' }), { status: 409 });
+        }
         // Hash the password before saving
         password = await bcrypt.hash(password, 10);
         // Create a new user

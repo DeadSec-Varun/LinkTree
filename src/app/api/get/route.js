@@ -7,11 +7,13 @@ export async function POST(req) {
     try {
         await connectDB();
 
-        const { handle, password } = await req.json();
+        let { handle, password } = await req.json();
 
         if (!handle || !password) {
             return new Response(JSON.stringify({ error: 'Handle or password missing' }), { status: 400 });
         }
+        // Normalize handle to lowercase
+        handle = handle.toLowerCase();
         const user = await User.findOne({ handle });
         console.log(user);
 
