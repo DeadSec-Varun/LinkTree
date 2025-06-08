@@ -26,9 +26,26 @@ export async function POST(req) {
         const newUser = new User({ handle, password, pic: "", desc: "", links: [] });
         await newUser.save();
         await createSession({ id: newUser._id.toString() });
-        return new Response(JSON.stringify({ message: 'User created successfully' }), { status: 201});
+        return new Response(JSON.stringify({ message: 'User created successfully' }), { status: 201 });
     } catch (error) {
         console.error(error);
         return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+    }
+}
+
+export async function GET(req) {
+    const { searchParams } = new URL(req.url);
+    let handle = searchParams.get('handle');
+    if (!handle) {
+        return new Response(JSON.stringify({ error: 'Handle is required' }), { status: 400 });
+    }
+    await connectDB();
+    handle = handle.toLowerCase();
+    // Check if the user exists
+    const user = await User.findOne({ handle });
+    if (user) {
+        return new Response(JSON.stringify({ exists: true, message: 'Handle unavailable' }), { status: 200 });
+    } else {
+        return new Response(JSON.stringify({ exists: false, message: 'Handle available' }), { status: 200 });
     }
 }
