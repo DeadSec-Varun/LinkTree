@@ -1,6 +1,7 @@
 // middleware.js
 import { NextResponse } from 'next/server';
 import { getSession } from './lib/session';
+// import { rateLimitter } from './lib/rateLimitter';
 
 export async function middleware(req) {
 
@@ -9,8 +10,14 @@ export async function middleware(req) {
     const apiRoutes = ['/api/generate'];
     const path = req.nextUrl.pathname;
 
-    const payload = await getSession(req);        
+    // Check if user is in limitted rate
+    // rateLimitter(req.ip).then((isAllowed) => {
+    //     if (!isAllowed) {
+    //         return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+    //     }
+    // });
 
+    const payload = await getSession(req);        
     if (!payload && protectedRoutes.includes(path)) {
         // If the user is not authenticated and trying to access a protected route, redirect to the login page
         return NextResponse.redirect(new URL('/', req.url));
@@ -33,4 +40,9 @@ export async function middleware(req) {
     }
     return NextResponse.next();
 }
+
+// export const config = {
+//   runtime: 'nodejs'
+// }
+
 

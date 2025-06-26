@@ -1,3 +1,6 @@
+export const dynamic = 'force-static'
+export const revalidate = 600;
+
 import { User } from "@/models/Users";
 import { notFound } from "next/navigation";
 import Link from "next/link";

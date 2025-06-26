@@ -3,6 +3,8 @@ import { User } from '@/models/Users';
 import bcrypt from 'bcrypt';
 import { createSession } from '@/lib/session';
 
+import { apiRateLimitter } from '@/lib/rateLimitter';
+
 export async function POST(req) {
     try {
         await connectDB();
@@ -34,6 +36,15 @@ export async function POST(req) {
 }
 
 export async function GET(req) {
+
+    const forwarded = req.headers.get('x-forwarded-for')
+    const ip = forwarded?.split(',')[0] || 'unknown'
+
+    const isAllowed = await apiRateLimitter(ip);
+    console.log('Rate limit check for IP:', ip, 'is:', isAllowed);
+    if (!isAllowed)
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), { status: 429 });
+
     const { searchParams } = new URL(req.url);
     let handle = searchParams.get('handle');
     if (!handle) {
